@@ -1,0 +1,76 @@
+---
+title: "Creación de Base de Datos: Parte 3"
+css: custom.css
+
+execute:
+  enabled: true
+  kernel: R
+---
+
+## Cargamos las Librerías: {.fade-in}
+```{r}
+source('~/limpieza/congresos/models/R/script.R')
+```
+
+## Cargar Tibbles: {.fade-in}
+En esta sección, cargamos los datos limpios de los procesos electorales del año 2015 y 2016 para añadir variables adicionales.
+```{r}
+datos_2015 <- read_csv("~/limpieza/congresos/{{cookiecutter.project_slug}}/data/processed/datos_2015.csv")
+datos_2016 <- read_csv("~/limpieza/congresos/{{cookiecutter.project_slug}}/data/processed/datos_2016.csv")
+datos_2017 <- read_csv("~/limpieza/congresos/{{cookiecutter.project_slug}}/data/processed/datos_2017.csv")
+datos_2018 <- read_csv("~/limpieza/congresos/{{cookiecutter.project_slug}}/data/processed/datos_2018.csv")
+datos_2019 <- read_csv("~/limpieza/congresos/{{cookiecutter.project_slug}}/data/processed/datos_2019.csv")
+datos_2021 <- read_csv("~/limpieza/congresos/{{cookiecutter.project_slug}}/data/processed/datos_2021.csv")
+datos_2022 <- read_csv("~/limpieza/congresos/{{cookiecutter.project_slug}}/data/processed/datos_2022.csv")
+datos_2023 <- read_csv("~/limpieza/congresos/{{cookiecutter.project_slug}}/data/processed/datos_2023.csv")
+```
+
+## Unir Tibbles: {.fade-in}
+En esta sección, unimos los datos de los procesos electorales del año 2015 al 2023 en un solo tibble
+```{r}
+datos_electorales_2015_2023 <- unir_tibbles(datos_2015, datos_2016, datos_2017, datos_2018, datos_2019, datos_2021, datos_2022, datos_2023)
+```
+
+## Visualizar los Datos: {.fade-in}
+Mostramos los datos unidos en una tabla interactiva para una revisión visual rápida.
+```{r}
+reactable(datos_electorales_2015_2023)
+```
+
+```{r}
+datos_electorales_2015_2023 <-     datos_electorales_2015_2023 %>%
+  rename(ID_estado = ID_ESTADO, Nombre_estado = NOMBRE_ESTADO, ID_municipio = ID_MUNICIPIO, Municipio = MUNICIPIO, Votos_validos = NUM_VOTOS_VALIDOS,  Votos_candidato_sin_registro=NUM_VOTOS_CAN_NREG, Votos_nulos= NUM_VOTOS_NULOS, Total_de_votos = TOTAL_VOTOS, Lista_nominal = LISTA_NOMINAL )
+```
+
+
+```{r}
+write_csv(datos_electorales_2015_2023, "/home/barea/limpieza/congresos/{{cookiecutter.project_slug}}/data/final/datos_electorales_2015_2023.csv")
+```
+
+
+
+## Guardar los Resultados en la Carpeta 'final': {.fade-in}
+Finalmente, guardamos los datos unidos en un archivo CSV en la carpeta 'final' para su uso posterior.
+```{r}
+write_csv(datos_electorales_2015_2023, "/home/barea/limpieza/congresos/{{cookiecutter.project_slug}}/data/final/datos_electorales_2015_2023_cong.csv")
+```
+
+
+```{r}
+data_cong <- read_csv('~/limpieza/congresos/{{cookiecutter.project_slug}}/data/final/datos_electorales_2015_2023_cong.csv')
+```
+
+```{r}
+data_cong %>%
+  filter(Partido == "Candidatura Independiente") %>%
+  group_by(Año) %>%
+  summarise(Total_Votos = sum(Votos))
+```
+
+```{r}
+data_cong %>%
+  filter(Partido == "Candidatura Independiente") %>%
+  group_by(Año) %>%
+  count() %>%
+  rename(Independientes = n)
+```
