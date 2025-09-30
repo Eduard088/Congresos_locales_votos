@@ -38,6 +38,31 @@ Mostramos los datos limpios en una tabla interactiva para una revisión visual r
 reactable(datos_2015)
 ```
 
+### Sustituimos el Partido que Genera Conflicto:
+```{r}
+datos_2015 <- datos_2015 %>%
+  mutate(Partido = str_replace_all(Partido, "NVA_ALIANZA", "NUAL"))
+```
+
+### Calculamos los Votos por Coalición:
+```{r}
+datos_2015 <- calcular_votos_coalicion(datos_2015)
+```
+
+```{r}
+reactable(datos_2015)
+```
+
+### Filtramos para Comprobar:
+```{r}
+datos_2015 %>% 
+  filter(ID_ESTADO == 31,
+         ID_DISTRITO == 2,
+         CABECERA_DISTRITAL == "MERIDA") %>% 
+  select(Partido, Votos, votos_coalicion)
+```
+
+
 ### Guardar los Resultados en la Carpeta 'Preprocessed': {.fade-in}
 Finalmente, guardamos los datos limpios en un archivo CSV en la carpeta 'preprocessed' para su uso posterior.
 ```{r}
@@ -65,13 +90,6 @@ print(archivos_csv_2016)
 En este paso, se aplica la función `limpiar_datos` a cada archivo CSV cargado para limpiar y transformar los datos. La función `purrr::map_dfr` se utiliza para combinar los datos limpios en un solo data frame.
 ```{r}
 datos_2016 <- purrr::map_dfr(archivos_csv_2016, limpiar_datos)
-datos_2016 <- as.data.frame(lapply(datos_2016, function(x) {
-  if (is.character(x)) {
-    iconv(x, from = "Latin1", to = "UTF-8")
-  } else {
-    x
-  }
-}))
 ```
 
 ### Mostrar el Resultado: {.fade-in}
@@ -80,10 +98,37 @@ Aquí se muestra el data frame resultante de los datos limpios utilizando la fun
 reactable(datos_2016)
 ```
 
+### Sustituimos el Partido que Genera Conflicto:
+```{r}
+datos_2016 <- datos_2016 %>%
+  mutate(Partido = str_replace_all(Partido, "NVA_ALIANZA", "NUAL"))
+```
+
+### Calculamos los Votos por Coalición:
+```{r}
+datos_2016 <- calcular_votos_coalicion(datos_2016)
+```
+
+```{r}
+reactable(datos_2016)
+```
+
+### Filtramos para Comprobar:
+```{r}
+print(n=30, datos_2016 %>% 
+  filter(ID_ESTADO == 32,
+         ID_DISTRITO == 7,
+         CABECERA_DISTRITAL == "FRESNILLO") %>% 
+  select(Partido, Votos, votos_coalicion))
+```
+
+
+
+
 ### Guardar los Resultados en la Carpeta 'Preprocessed': {.fade-in}
 Finalmente, se guardan los datos limpios y procesados en un archivo CSV en la carpeta 'preprocessed' para su uso posterior.
 ```{r}
-write_csv(datos_2016, "/home/barea/limpieza/congresos/{{cookiecutter.project_slug}}/data/preprocessed/datos_2016.csv")
+# write_csv(datos_2016, "/home/barea/limpieza/congresos/{{cookiecutter.project_slug}}/data/preprocessed/datos_2016.csv")
 ```
 
 
@@ -114,8 +159,34 @@ reactable(datos_2017)
 
 ### Guardar los Resultados en la Carpeta 'Preprocessed': {.fade-in}
 Esta sección guarda el data frame limpio en un archivo CSV en la carpeta 'preprocessed'.
+
+### Sustituimos el Partido que Genera Conflicto:
 ```{r}
-write_csv(datos_2017, "~/limpieza/congresos/{{cookiecutter.project_slug}}/data/preprocessed/datos_2017.csv")
+datos_2017 <- datos_2017 %>%
+  mutate(Partido = str_replace_all(Partido, "NVA_ALIANZA", "NUAL"))
+```
+
+### Calculamos los Votos por Coalición:
+```{r}
+datos_2017 <- calcular_votos_coalicion(datos_2017)
+```
+
+```{r}
+reactable(datos_2017)
+```
+
+### Filtramos para Comprobar:
+```{r}
+print(n=30, datos_2017 %>% 
+  filter(ID_ESTADO == 5,
+         ID_DISTRITO == 2,
+         CABECERA_DISTRITAL == "PIEDRAS NEGRAS") %>% 
+  select(Partido, Votos, votos_coalicion))
+```
+
+
+```{r}
+# write_csv(datos_2017, "~/limpieza/congresos/{{cookiecutter.project_slug}}/data/preprocessed/datos_2017.csv")
 ```
 
 
@@ -148,6 +219,49 @@ Se muestra una tabla interactiva con los datos limpios utilizando la función `r
 
 ```{r}
 reactable(datos_2018)
+```
+
+
+### Sustituimos el Partido que Genera Conflicto:
+```{r}
+datos_2018 <- datos_2018 %>%
+  mutate(Partido = str_replace_all(Partido, "NVA_ALIANZA", "NUAL"))
+
+datos_2018 <- datos_2018 %>%
+  mutate(Partido = str_replace_all(Partido, "_NA", "_NUAL"))
+
+datos_2018 <- datos_2018 %>%
+  mutate(Partido = str_replace_all(Partido, "_NA_", "_NUAL_"))
+
+datos_2018 <- datos_2018 %>%
+  mutate(Partido = str_replace_all(Partido, "_NA_", "_NUAL_"))
+
+datos_2018$Partido[datos_2018$Partido == "NA"] <- "NUAL"
+
+```
+
+### Calculamos los Votos por Coalición:
+```{r}
+datos_2018 <- calcular_votos_coalicion_2018(datos_2018)
+```
+
+```{r}
+reactable(datos_2018)
+```
+
+```{r}
+datos_2018 <- datos_2018 %>%
+  mutate(ID_ESTADO = as.integer(ID_ESTADO),
+         ID_DISTRITO_LOCAL = as.integer(ID_DISTRITO_LOCAL))
+```
+
+### Filtramos para Comprobar:
+```{r}
+print(n=20, datos_2018 %>% 
+  filter(ID_ESTADO == 32,
+         ID_DISTRITO_LOCAL == 1,
+         CABECERA_DISTRITAL_LOCAL == "ZACATECAS") %>% 
+  select(Partido, Votos, votos_coalicion))
 ```
 
 ### Guardar los Resultados en la Carpeta 'Preprocessed': {.fade-in}
@@ -186,12 +300,295 @@ Este bloque muestra el data frame `datos_2019` en una tabla interactiva utilizan
 reactable(datos_2019)
 ```
 
+### Sustituimos el Partido que Genera Conflicto:
+```{r}
+datos_2019 <- datos_2019 %>%
+  mutate(Partido = str_replace_all(Partido, "NVA_ALIANZA", "NUAL"))
+
+datos_2019 <- datos_2019 %>%
+  mutate(Partido = str_replace_all(Partido, "_NA", "_NUAL"))
+
+datos_2018 <- datos_2019 %>%
+  mutate(Partido = str_replace_all(Partido, "_NA_", "_NUAL_"))
+
+datos_2019 <- datos_2019 %>%
+  mutate(Partido = str_replace_all(Partido, "_NA_", "_NUAL_"))
+
+datos_2019$Partido[datos_2019$Partido == "NA"] <- "NUAL"
+
+```
+
+### Calculamos los Votos por Coalición:
+```{r}
+datos_2019 <- calcular_votos_coalicion_2018(datos_2019)
+```
+
+```{r}
+reactable(datos_2019)
+```
+
+```{r}
+datos_2019 <- datos_2019 %>%
+  mutate(ID_ESTADO = as.integer(ID_ESTADO),
+         ID_DISTRITO_LOCAL = as.integer(ID_DISTRITO_LOCAL))
+```
+
+### Filtramos para Comprobar:
+```{r}
+print(n=23, datos_2019 %>% 
+  filter(ID_ESTADO == 23,
+         ID_DISTRITO_LOCAL == 2,
+         CABECERA_DISTRITAL_LOCAL == "CANCÚN") %>% 
+  select(Partido, Votos, votos_coalicion))
+```
+
+
 ### Guardar los Resultados en la Carpeta 'Preprocessed': {.fade-in}
 Este bloque guarda el data frame `datos_2019` en un archivo CSV en la carpeta 'preprocessed'.
 
 ```{r}
 # write_csv(datos_2019, "~/limpieza/congresos/{{cookiecutter.project_slug}}/data/preprocessed/datos_2019.csv")
 ```
+
+
+# Proceso Electoral 2019: {.fade-in}
+Este bloque de código carga todos los archivos CSV del directorio especificado que contienen datos del proceso electoral de 2019.
+
+```{r}
+archivos_csv_2019 <- list.files(path = "~/limpieza/congresos/{{cookiecutter.project_slug}}/data/raw/2019", pattern = "\\.csv$", full.names = TRUE)
+```
+
+### Mostrar los Archivos Cargados: {.fade-in}
+Este bloque imprime la lista de archivos CSV que se han cargado desde el directorio especificado.
+
+```{r}
+print(archivos_csv_2019)
+```
+
+### Utilizar la Función de Limpieza de Datos: {.fade-in}
+Este bloque aplica la función `limpiar_datos_2018` a cada archivo CSV cargado, combinando los resultados en un solo data frame llamado `datos_2019`.
+
+```{r}
+datos_2019 <- purrr::map_dfr(archivos_csv_2019, limpiar_datos_2018)
+```
+
+### Mostrar el Resultado: {.fade-in}
+Este bloque muestra el data frame `datos_2019` en una tabla interactiva utilizando la función `reactable`.
+
+```{r}
+reactable(datos_2019)
+```
+
+### Sustituimos el Partido que Genera Conflicto:
+```{r}
+datos_2019 <- datos_2019 %>%
+  mutate(Partido = str_replace_all(Partido, "NVA_ALIANZA", "NUAL"))
+
+datos_2019 <- datos_2019 %>%
+  mutate(Partido = str_replace_all(Partido, "_NA", "_NUAL"))
+
+datos_2018 <- datos_2019 %>%
+  mutate(Partido = str_replace_all(Partido, "_NA_", "_NUAL_"))
+
+datos_2019 <- datos_2019 %>%
+  mutate(Partido = str_replace_all(Partido, "_NA_", "_NUAL_"))
+
+datos_2019$Partido[datos_2019$Partido == "NA"] <- "NUAL"
+
+```
+
+### Calculamos los Votos por Coalición:
+```{r}
+datos_2019 <- calcular_votos_coalicion_2018(datos_2019)
+```
+
+```{r}
+reactable(datos_2019)
+```
+
+```{r}
+datos_2019 <- datos_2019 %>%
+  mutate(ID_ESTADO = as.integer(ID_ESTADO),
+         ID_DISTRITO_LOCAL = as.integer(ID_DISTRITO_LOCAL))
+```
+
+### Filtramos para Comprobar:
+```{r}
+print(n=23, datos_2019 %>% 
+  filter(ID_ESTADO == 23,
+         ID_DISTRITO_LOCAL == 2,
+         CABECERA_DISTRITAL_LOCAL == "CANCÚN") %>% 
+  select(Partido, Votos, votos_coalicion))
+```
+
+
+### Guardar los Resultados en la Carpeta 'Preprocessed': {.fade-in}
+Este bloque guarda el data frame `datos_2019` en un archivo CSV en la carpeta 'preprocessed'.
+
+```{r}
+# write_csv(datos_2019, "~/limpieza/congresos/{{cookiecutter.project_slug}}/data/preprocessed/datos_2019.csv")
+```
+
+
+
+# Proceso Electoral 2019: {.fade-in}
+Este bloque de código carga todos los archivos CSV del directorio especificado que contienen datos del proceso electoral de 2019.
+
+```{r}
+archivos_csv_2019 <- list.files(path = "~/limpieza/congresos/{{cookiecutter.project_slug}}/data/raw/2019", pattern = "\\.csv$", full.names = TRUE)
+```
+
+### Mostrar los Archivos Cargados: {.fade-in}
+Este bloque imprime la lista de archivos CSV que se han cargado desde el directorio especificado.
+
+```{r}
+print(archivos_csv_2019)
+```
+
+### Utilizar la Función de Limpieza de Datos: {.fade-in}
+Este bloque aplica la función `limpiar_datos_2018` a cada archivo CSV cargado, combinando los resultados en un solo data frame llamado `datos_2019`.
+
+```{r}
+datos_2019 <- purrr::map_dfr(archivos_csv_2019, limpiar_datos_2018)
+```
+
+### Mostrar el Resultado: {.fade-in}
+Este bloque muestra el data frame `datos_2019` en una tabla interactiva utilizando la función `reactable`.
+
+```{r}
+reactable(datos_2019)
+```
+
+### Sustituimos el Partido que Genera Conflicto:
+```{r}
+datos_2019 <- datos_2019 %>%
+  mutate(Partido = str_replace_all(Partido, "NVA_ALIANZA", "NUAL"))
+
+datos_2019 <- datos_2019 %>%
+  mutate(Partido = str_replace_all(Partido, "_NA", "_NUAL"))
+
+datos_2018 <- datos_2019 %>%
+  mutate(Partido = str_replace_all(Partido, "_NA_", "_NUAL_"))
+
+datos_2019 <- datos_2019 %>%
+  mutate(Partido = str_replace_all(Partido, "_NA_", "_NUAL_"))
+
+datos_2019$Partido[datos_2019$Partido == "NA"] <- "NUAL"
+
+```
+
+### Calculamos los Votos por Coalición:
+```{r}
+datos_2019 <- calcular_votos_coalicion_2018(datos_2019)
+```
+
+```{r}
+reactable(datos_2019)
+```
+
+```{r}
+datos_2019 <- datos_2019 %>%
+  mutate(ID_ESTADO = as.integer(ID_ESTADO),
+         ID_DISTRITO_LOCAL = as.integer(ID_DISTRITO_LOCAL))
+```
+
+### Filtramos para Comprobar:
+```{r}
+print(n=23, datos_2019 %>% 
+  filter(ID_ESTADO == 23,
+         ID_DISTRITO_LOCAL == 2,
+         CABECERA_DISTRITAL_LOCAL == "CANCÚN") %>% 
+  select(Partido, Votos, votos_coalicion))
+```
+
+
+### Guardar los Resultados en la Carpeta 'Preprocessed': {.fade-in}
+Este bloque guarda el data frame `datos_2019` en un archivo CSV en la carpeta 'preprocessed'.
+
+```{r}
+# write_csv(datos_2019, "~/limpieza/congresos/{{cookiecutter.project_slug}}/data/preprocessed/datos_2019.csv")
+```
+
+
+
+# Proceso Electoral 2020: {.fade-in}
+Este bloque de código carga todos los archivos CSV del directorio especificado que contienen datos del proceso electoral de 2019.
+
+```{r}
+archivos_csv_2020 <- list.files(path = "~/limpieza/congresos/{{cookiecutter.project_slug}}/data/raw/2020", pattern = "\\.csv$", full.names = TRUE)
+```
+
+### Mostrar los Archivos Cargados: {.fade-in}
+Este bloque imprime la lista de archivos CSV que se han cargado desde el directorio especificado.
+
+```{r}
+print(archivos_csv_2020)
+```
+
+### Utilizar la Función de Limpieza de Datos: {.fade-in}
+Este bloque aplica la función `limpiar_datos_2018` a cada archivo CSV cargado, combinando los resultados en un solo data frame llamado `datos_2019`.
+
+```{r}
+datos_2020 <- purrr::map_dfr(archivos_csv_2020, limpiar_datos_2018)
+```
+
+### Mostrar el Resultado: {.fade-in}
+Este bloque muestra el data frame `datos_2019` en una tabla interactiva utilizando la función `reactable`.
+
+```{r}
+reactable(datos_2020)
+```
+
+### Sustituimos el Partido que Genera Conflicto:
+```{r}
+datos_2020 <- datos_2020 %>%
+  mutate(Partido = str_replace_all(Partido, "NVA_ALIANZA", "NUAL"))
+
+datos_2020 <- datos_2020 %>%
+  mutate(Partido = str_replace_all(Partido, "_NA", "_NUAL"))
+
+datos_2020 <- datos_2020 %>%
+  mutate(Partido = str_replace_all(Partido, "_NA_", "_NUAL_"))
+
+datos_2020 <- datos_2020 %>%
+  mutate(Partido = str_replace_all(Partido, "_NA_", "_NUAL_"))
+
+datos_2020$Partido[datos_2020$Partido == "NA"] <- "NUAL"
+
+```
+
+### Calculamos los Votos por Coalición:
+```{r}
+datos_2020 <- calcular_votos_coalicion_2018(datos_2020)
+```
+
+```{r}
+reactable(datos_2020)
+```
+
+```{r}
+datos_2020 <- datos_2020 %>%
+  mutate(ID_ESTADO = as.integer(ID_ESTADO),
+         ID_DISTRITO_LOCAL = as.integer(ID_DISTRITO_LOCAL))
+```
+
+### Filtramos para Comprobar:
+```{r}
+print(n=23, datos_2020 %>% 
+  filter(ID_ESTADO == 5,
+         ID_DISTRITO_LOCAL == 5,
+         CABECERA_DISTRITAL_LOCAL == "MONCLOVA") %>% 
+  select(Partido, Votos, votos_coalicion))
+```
+
+
+### Guardar los Resultados en la Carpeta 'Preprocessed': {.fade-in}
+Este bloque guarda el data frame `datos_2019` en un archivo CSV en la carpeta 'preprocessed'.
+
+```{r}
+# write_csv(datos_2020, "~/limpieza/congresos/{{cookiecutter.project_slug}}/data/preprocessed/datos_2020.csv")
+```
+
 
 
 # Proceso Electoral 2021: {.fade-in}
@@ -222,6 +619,31 @@ Este bloque de código muestra el data frame resultante en una tabla interactiva
 reactable(datos_2021)
 ```
 
+### Calculamos los Votos por Coalición:
+```{r}
+datos_2021 <- calcular_votos_coalicion_2018(datos_2021)
+```
+
+```{r}
+reactable(datos_2021)
+```
+
+```{r}
+datos_2021 <- datos_2021 %>%
+  mutate(ID_ESTADO = as.integer(ID_ESTADO),
+         ID_DISTRITO_LOCAL = as.integer(ID_DISTRITO_LOCAL))
+```
+
+### Filtramos para Comprobar:
+```{r}
+print(n=23, datos_2021 %>% 
+  filter(ID_ESTADO == 31,
+         ID_DISTRITO_LOCAL == 1,
+         CABECERA_DISTRITAL_LOCAL == "MERIDA") %>% 
+  select(Partido, Votos, votos_coalicion))
+```
+
+
 ### Guardar los Resultados en la Carpeta 'Preprocessed': {.fade-in}
 Finalmente, se guarda el data frame resultante en un archivo CSV en la carpeta 'preprocessed'.
 
@@ -251,6 +673,32 @@ Se aplica una función de limpieza a cada uno de los archivos CSV cargados para 
 datos_2022 <- purrr::map_dfr(archivos_csv_2022, limpiar_datos_2018)
 ```
 
+
+### Calculamos los Votos por Coalición:
+```{r}
+datos_2022 <- calcular_votos_coalicion_2018(datos_2022)
+```
+
+```{r}
+reactable(datos_2022)
+```
+
+```{r}
+datos_2022 <- datos_2022 %>%
+  mutate(ID_ESTADO = as.integer(ID_ESTADO),
+         ID_DISTRITO_LOCAL = as.integer(ID_DISTRITO_LOCAL))
+```
+
+### Filtramos para Comprobar:
+```{r}
+print(n=23, datos_2022 %>% 
+  filter(ID_ESTADO == 23,
+         ID_DISTRITO_LOCAL == 1,
+         CABECERA_DISTRITAL_LOCAL == "KANTUNILKIN") %>% 
+  select(Partido, Votos, votos_coalicion))
+```
+
+
 ### Mostrar el Resultado: {.fade-in}
 Se muestra una tabla interactiva con los datos limpios para su revisión.
 ```{r}
@@ -260,7 +708,7 @@ reactable(datos_2022)
 ### Guardar los Resultados en la Carpeta 'Preprocessed':
 Finalmente, se guardan los datos limpios en un archivo CSV en la carpeta 'preprocessed'.
 ```{r}
-# write_csv(datos_2022, "~/limpieza/congresos/{{cookiecutter.project_slug}}/data/preprocessed/datos_2022.csv")
+write_csv(datos_2022, "~/limpieza/congresos/{{cookiecutter.project_slug}}/data/preprocessed/datos_2022.csv")
 ```
 
 # Proceso Electoral 2023: {.fade-in}
@@ -282,13 +730,30 @@ print(archivos_csv_2023)
 Se aplica una función de limpieza a cada uno de los archivos CSV cargados para unificar y preparar los datos.
 ```{r}
 datos_2023 <- purrr::map_dfr(archivos_csv_2023, limpiar_datos_2018)
-datos_2023 <- as.data.frame(lapply(datos_2023, function(x) {
-  if (is.character(x)) {
-    iconv(x, from = "Latin1", to = "UTF-8")
-  } else {
-    x
-  }
-}))
+```
+
+### Calculamos los Votos por Coalición:
+```{r}
+datos_2023 <- calcular_votos_coalicion_2018(datos_2023)
+```
+
+```{r}
+reactable(datos_2023)
+```
+
+```{r}
+datos_2023 <- datos_2023 %>%
+  mutate(ID_ESTADO = as.integer(ID_ESTADO),
+         ID_DISTRITO_LOCAL = as.integer(ID_DISTRITO_LOCAL))
+```
+
+### Filtramos para Comprobar:
+```{r}
+print(n=23, datos_2023 %>% 
+  filter(ID_ESTADO == 5,
+         ID_DISTRITO_LOCAL == 10,
+         CABECERA_DISTRITAL_LOCAL == "TORREON") %>% 
+  select(Partido, Votos, votos_coalicion))
 ```
 
 ### Mostrar el Resultado: {.fade-in}
@@ -300,5 +765,5 @@ reactable(datos_2023)
 ### Guardar los Resultados en la Carpeta 'Preprocessed':
 Finalmente, se guardan los datos limpios en un archivo CSV en la carpeta 'preprocessed'.
 ```{r}
-write_csv(datos_2023, "~/limpieza/congresos/{{cookiecutter.project_slug}}/data/preprocessed/datos_2023.csv")
+# write_csv(datos_2023, "~/limpieza/congresos/{{cookiecutter.project_slug}}/data/preprocessed/datos_2023.csv")
 ```

@@ -12,6 +12,13 @@ execute:
 source('~/limpieza/congresos/models/R/script.R')
 ```
 
+
+```{r}
+datos_2020 <- read_csv("~/limpieza/congresos/{{cookiecutter.project_slug}}/data/processed/datos_2020.csv")
+
+reactable(datos_2020)
+```
+
 ## Cargar Tibbles: {.fade-in}
 En esta sección, cargamos los datos limpios de los procesos electorales del año 2015 y 2016 para añadir variables adicionales.
 ```{r}
@@ -20,6 +27,7 @@ datos_2016 <- read_csv("~/limpieza/congresos/{{cookiecutter.project_slug}}/data/
 datos_2017 <- read_csv("~/limpieza/congresos/{{cookiecutter.project_slug}}/data/processed/datos_2017.csv")
 datos_2018 <- read_csv("~/limpieza/congresos/{{cookiecutter.project_slug}}/data/processed/datos_2018.csv")
 datos_2019 <- read_csv("~/limpieza/congresos/{{cookiecutter.project_slug}}/data/processed/datos_2019.csv")
+datos_2020 <- read_csv("~/limpieza/congresos/{{cookiecutter.project_slug}}/data/processed/datos_2020.csv")
 datos_2021 <- read_csv("~/limpieza/congresos/{{cookiecutter.project_slug}}/data/processed/datos_2021.csv")
 datos_2022 <- read_csv("~/limpieza/congresos/{{cookiecutter.project_slug}}/data/processed/datos_2022.csv")
 datos_2023 <- read_csv("~/limpieza/congresos/{{cookiecutter.project_slug}}/data/processed/datos_2023.csv")
@@ -27,8 +35,65 @@ datos_2023 <- read_csv("~/limpieza/congresos/{{cookiecutter.project_slug}}/data/
 
 ## Unir Tibbles: {.fade-in}
 En esta sección, unimos los datos de los procesos electorales del año 2015 al 2023 en un solo tibble
+
+
 ```{r}
-datos_electorales_2015_2023 <- unir_tibbles(datos_2015, datos_2016, datos_2017, datos_2018, datos_2019, datos_2021, datos_2022, datos_2023)
+datos_2015 <- datos_2015 %>%
+  rename(ID_DISTRITO_LOCAL = ID_DISTRITO, CABECERA_DISTRITAL_LOCAL = CABECERA_DISTRITAL)
+
+datos_2016 <- datos_2016 %>%
+  rename(ID_DISTRITO_LOCAL = ID_DISTRITO, CABECERA_DISTRITAL_LOCAL = CABECERA_DISTRITAL)
+
+datos_2017 <- datos_2017 %>%
+  rename(ID_DISTRITO_LOCAL = ID_DISTRITO, CABECERA_DISTRITAL_LOCAL = CABECERA_DISTRITAL)
+```
+
+
+```{r}
+datos_2015 <- datos_2015 %>%
+  mutate(ID_ESTADO = as.integer(ID_ESTADO),
+         ID_DISTRITO_LOCAL = as.integer(ID_DISTRITO_LOCAL))
+
+datos_2016 <- datos_2016 %>%
+  mutate(ID_ESTADO = as.integer(ID_ESTADO),
+         ID_DISTRITO_LOCAL = as.integer(ID_DISTRITO_LOCAL))
+
+datos_2017 <- datos_2017 %>%
+  mutate(ID_ESTADO = as.integer(ID_ESTADO),
+         ID_DISTRITO_LOCAL = as.integer(ID_DISTRITO_LOCAL))
+
+datos_2018 <- datos_2018 %>%
+  mutate(ID_ESTADO = as.integer(ID_ESTADO),
+         ID_DISTRITO_LOCAL = as.integer(ID_DISTRITO_LOCAL))
+
+datos_2019 <- datos_2019 %>%
+  mutate(ID_ESTADO = as.integer(ID_ESTADO),
+         ID_DISTRITO_LOCAL = as.integer(ID_DISTRITO_LOCAL))
+
+datos_2020 <- datos_2020 %>%
+  mutate(ID_ESTADO = as.integer(ID_ESTADO),
+         ID_DISTRITO_LOCAL = as.integer(ID_DISTRITO_LOCAL))
+
+datos_2021 <- datos_2021 %>%
+  mutate(ID_ESTADO = as.integer(ID_ESTADO),
+         ID_DISTRITO_LOCAL = as.integer(ID_DISTRITO_LOCAL))
+
+datos_2022 <- datos_2022 %>%
+  mutate(ID_ESTADO = as.integer(ID_ESTADO),
+         ID_DISTRITO_LOCAL = as.integer(ID_DISTRITO_LOCAL))
+
+datos_2023 <- datos_2023 %>%
+  mutate(ID_ESTADO = as.integer(ID_ESTADO),
+         ID_DISTRITO_LOCAL = as.integer(ID_DISTRITO_LOCAL))
+```
+
+```{r}
+reactable(datos_2020)
+```
+
+
+```{r}
+datos_electorales_2015_2023 <- unir_tibbles(datos_2015, datos_2016, datos_2017, datos_2018, datos_2019, datos_2020, datos_2021, datos_2022, datos_2023)
 ```
 
 ## Visualizar los Datos: {.fade-in}
@@ -39,25 +104,463 @@ reactable(datos_electorales_2015_2023)
 
 ```{r}
 datos_electorales_2015_2023 <-     datos_electorales_2015_2023 %>%
-  rename(ID_estado = ID_ESTADO, Nombre_estado = NOMBRE_ESTADO, ID_municipio = ID_MUNICIPIO, Municipio = MUNICIPIO, Votos_validos = NUM_VOTOS_VALIDOS,  Votos_candidato_sin_registro=NUM_VOTOS_CAN_NREG, Votos_nulos= NUM_VOTOS_NULOS, Total_de_votos = TOTAL_VOTOS, Lista_nominal = LISTA_NOMINAL )
+  rename(ID_estado = ID_ESTADO, Nombre_estado = NOMBRE_ESTADO, ID_distrito_local = 
+  ID_DISTRITO_LOCAL, Cabecera_distrital_local = CABECERA_DISTRITAL_LOCAL, Votos_validos = NUM_VOTOS_VALIDOS,  Votos_candidato_sin_registro=NUM_VOTOS_CAN_NREG, Votos_nulos= NUM_VOTOS_NULOS, Total_de_votos = TOTAL_VOTOS, Lista_nominal = LISTA_NOMINAL )
+```
+
+```{r}
+reactable(datos_electorales_2015_2023)
 ```
 
 
 ```{r}
-write_csv(datos_electorales_2015_2023, "/home/barea/limpieza/congresos/{{cookiecutter.project_slug}}/data/final/datos_electorales_2015_2023.csv")
+datos_electorales_2015_2023 <- datos_electorales_2015_2023 %>%
+  mutate(
+    Cabecera_distrital_local = case_when(
+      Año == 2018 &
+      Nombre_estado == "BAJA CALIFORNIA SUR" &
+      ID_distrito_local %in% c(10, 11) &
+      Cabecera_distrital_local == "CD. CONSTITUCION" ~ "CIUDAD CONSTITUCION",
+      TRUE ~ Cabecera_distrital_local
+    )
+  )
+```
+
+```{r}
+datos_electorales_2015_2023 <- datos_electorales_2015_2023 %>%
+  mutate(
+    Partido = case_when(
+      Año == 2018 &
+      Nombre_estado == "DURANGO" &
+      ID_distrito_local == 5 &
+      Partido == "C_COMUN_PAN_PRD_PD" ~ "PAN_PRD_PD",
+      TRUE ~ Partido
+    )
+  )
+```
+
+```{r}
+datos_electorales_2015_2023 <- datos_electorales_2015_2023 %>%
+  mutate(
+    Partido = case_when(
+      Año == 2018 &
+      Nombre_estado == "DURANGO" &
+      ID_distrito_local == 8 &
+      Partido == "C_COMUN_PAN_PRD_PD" ~ "PAN_PRD_PD",
+      TRUE ~ Partido
+    )
+  )
+```
+
+```{r}
+datos_electorales_2015_2023 <- datos_electorales_2015_2023 %>%
+  mutate(
+    Partido = case_when(
+      Año == 2018 &
+      Nombre_estado == "DURANGO" &
+      ID_distrito_local == 14 &
+      Partido == "C_COMUN_PAN_PRD_PD" ~ "PAN_PRD_PD",
+      TRUE ~ Partido
+    )
+  )
+```
+
+
+```{r}
+datos_electorales_2015_2023 <- datos_electorales_2015_2023 %>%
+  mutate(
+    Partido = case_when(
+      Año == 2018 &
+      Nombre_estado == "GUERRERO" &
+      ID_distrito_local == 20 &
+      Partido == "C_COMUN_PAN_PRD" ~ "PAN_PRD",
+      TRUE ~ Partido
+    )
+  )
+```
+
+```{r}
+datos_electorales_2015_2023 <- datos_electorales_2015_2023 %>%
+  mutate(
+    Partido = case_when(
+      Año == 2018 &
+      Nombre_estado == "GUERRERO" &
+      ID_distrito_local == 26 &
+      Partido == "C_COMUN_PAN_PRD" ~ "PAN_PRD",
+      TRUE ~ Partido
+    )
+  )
 ```
 
 
 
-## Guardar los Resultados en la Carpeta 'final': {.fade-in}
-Finalmente, guardamos los datos unidos en un archivo CSV en la carpeta 'final' para su uso posterior.
 ```{r}
-write_csv(datos_electorales_2015_2023, "/home/barea/limpieza/congresos/{{cookiecutter.project_slug}}/data/final/datos_electorales_2015_2023_cong.csv")
+datos_electorales_2015_2023 <- datos_electorales_2015_2023 %>%
+  mutate(
+    Cabecera_distrital_local = case_when(
+      Año == 2018 &
+      Nombre_estado == "MEXICO" &
+      ID_distrito_local == 1 &
+      Cabecera_distrital_local == "CHALCO DE DIAZ COVARRUBIAS 1" ~ "CHALCO DE DIAZ COVARRUBIAS",
+      TRUE ~ Cabecera_distrital_local
+    )
+  )
+```
+
+```{r}
+datos_electorales_2015_2023 <- datos_electorales_2015_2023 %>%
+  mutate(
+    Cabecera_distrital_local = case_when(
+      Año == 2018 &
+      Nombre_estado == "MEXICO" &
+      ID_distrito_local == 24 &
+      Cabecera_distrital_local == "CD. NEZAHUALCOYOTL 3" ~ "NEZAHUALCOYOTL",
+      TRUE ~ Cabecera_distrital_local
+    )
+  )
 ```
 
 
 ```{r}
-data_cong <- read_csv('~/limpieza/congresos/{{cookiecutter.project_slug}}/data/final/datos_electorales_2015_2023_cong.csv')
+datos_electorales_2015_2023 <- datos_electorales_2015_2023 %>%
+  mutate(
+    Cabecera_distrital_local = case_when(
+      Año == 2018 &
+      Nombre_estado == "MEXICO" &
+      ID_distrito_local == 25 &
+      Cabecera_distrital_local == "CD. NEZAHUALCOYOTL" ~ "NEZAHUALCOYOTL",
+      TRUE ~ Cabecera_distrital_local
+    )
+  )
+```
+
+```{r}
+datos_electorales_2015_2023 <- datos_electorales_2015_2023 %>%
+  mutate(
+    Cabecera_distrital_local = case_when(
+      Año == 2018 &
+      Nombre_estado == "MEXICO" &
+      ID_distrito_local == 29 &
+      Cabecera_distrital_local == "NAUCALPAN DE JUAREZ 4" ~ "NAUCALPAN DE JUAREZ 3",
+      TRUE ~ Cabecera_distrital_local
+    )
+  )
+```
+
+
+```{r}
+datos_electorales_2015_2023 <- datos_electorales_2015_2023 %>%
+  mutate(
+    Cabecera_distrital_local = case_when(
+      Año == 2018 &
+      Nombre_estado == "MEXICO" &
+      ID_distrito_local == 37 &
+      Cabecera_distrital_local == "TLALNEPANTLA DE BAZ 5" ~ "TLALNEPANTLA DE BAZ",
+      TRUE ~ Cabecera_distrital_local
+    )
+  )
+```
+
+
+```{r}
+datos_electorales_2015_2023 <- datos_electorales_2015_2023 %>%
+  mutate(
+    Cabecera_distrital_local = case_when(
+      Año == 2018 &
+      Nombre_estado == "MEXICO" &
+      ID_distrito_local == 40 &
+      Cabecera_distrital_local == "IXTAPALUCA 6" ~ "IXTAPALUCA",
+      TRUE ~ Cabecera_distrital_local
+    )
+  )
+```
+
+
+```{r}
+datos_electorales_2015_2023 <- datos_electorales_2015_2023 %>%
+  mutate(
+    Cabecera_distrital_local = case_when(
+      Año == 2018 &
+      Nombre_estado == "MEXICO" &
+      ID_distrito_local == 41 &
+      Cabecera_distrital_local == "CD. NEZAHUALCOYOTL" ~ "NEZAHUALCOYOTL",
+      TRUE ~ Cabecera_distrital_local
+    )
+  )
+```
+
+
+```{r}
+datos_electorales_2015_2023 <- datos_electorales_2015_2023 %>%
+  mutate(
+    Partido = case_when(
+      Año == 2018 &
+      Nombre_estado == "MEXICO" &
+      ID_distrito_local == 1 &
+      Partido == "C_COMUN_PAN_PRD" ~ "PAN_PRD",
+      TRUE ~ Partido
+    )
+  )
+```
+
+
+```{r}
+datos_electorales_2015_2023 <- datos_electorales_2015_2023 %>%
+  mutate(
+    Partido = case_when(
+      Año == 2018 &
+      Nombre_estado == "MICHOACAN" &
+      ID_distrito_local == 1 &
+      Partido == "C_COMUN_PAN_PRD" ~ "PAN_PRD",
+      TRUE ~ Partido
+    )
+  )  
+```
+
+
+```{r}
+datos_electorales_2015_2023 <- datos_electorales_2015_2023 %>%
+  mutate(
+    Partido = case_when(
+      Año == 2018 &
+      Nombre_estado == "MICHOACAN" &
+      ID_distrito_local == 9 &
+      Partido == "C_COMUN_PAN_MC" ~ "PAN_MC",
+      TRUE ~ Partido
+    )
+  )  
+```
+
+```{r}
+datos_electorales_2015_2023 <- datos_electorales_2015_2023 %>%
+  mutate(
+    Partido = case_when(
+      Año == 2018 &
+      Nombre_estado == "MICHOACAN" &
+      ID_distrito_local == 10 &
+      Partido == "C_COMUN_PAN_PRD" ~ "PAN_PRD",
+      TRUE ~ Partido
+    )
+  )  
+```
+
+
+```{r}
+datos_electorales_2015_2023 <- datos_electorales_2015_2023 %>%
+  mutate(
+    Cabecera_distrital_local = case_when(
+      Año == 2018 &
+      Nombre_estado == "MICHOACAN" &
+      ID_distrito_local == 21 &
+      Cabecera_distrital_local == "COALCOMÁN" ~ "COALCOMÁN DE VÁZQUEZ PALLARES",
+      TRUE ~ Cabecera_distrital_local
+    )
+  )
+```
+
+```{r}
+datos_electorales_2015_2023 <- datos_electorales_2015_2023 %>%
+  mutate(
+    Partido = case_when(
+      Año == 2018 &
+      Nombre_estado == "PUEBLA" &
+      ID_distrito_local == 22 &
+      Partido == "C_COMUN_PAN_PRD_MC_NUAL_PCPP_PSI" ~ "PAN_PRD_MC_PNA_PCPP_PSI",
+      TRUE ~ Partido
+    )
+  )  
+```
+
+
+
+
+```{r}
+datos_electorales_2015_2023 <- datos_electorales_2015_2023 %>%
+  mutate(
+    Partido = case_when(
+      Año == 2018 &
+      Nombre_estado == "MORELOS" &
+      ID_distrito_local == 5 &
+      Partido == "C_COMUN_PT_MORENA_ES" ~ "PT_MORENA_ES",
+      TRUE ~ Partido
+    )
+  )  
+```
+
+```{r}
+datos_electorales_2015_2023 <- datos_electorales_2015_2023 %>%
+  mutate(
+    Partido = case_when(
+      Año == 2018 &
+      Nombre_estado == "MORELOS" &
+      ID_distrito_local == 8 &
+      Partido == "C_COMUN_PT_MORENA_ES" ~ "PT_MORENA_ES",
+      TRUE ~ Partido
+    )
+  )  
+```
+
+```{r}
+datos_electorales_2015_2023 <- datos_electorales_2015_2023 %>%
+  mutate(
+    Partido = case_when(
+      Nombre_estado == "PUEBLA" & Año == 2018 ~ str_replace(Partido, "\\.\\.+.*$", ""),
+      TRUE ~ Partido
+    )
+  )
+```
+
+
+```{r}
+datos_electorales_2015_2023 <- datos_electorales_2015_2023 %>%
+  mutate(
+    Partido = case_when(
+      Año == 2018 &
+      Nombre_estado == "SINALOA" &
+      ID_distrito_local == 6 &
+      Partido == "C_COMUN_PRI_PVEM_NUAL" ~ "PRI_PVEM_NUAL",
+      TRUE ~ Partido
+    )
+  )  
+```
+
+
+```{r}
+datos_electorales_2015_2023 <- datos_electorales_2015_2023 %>%
+  mutate(
+    Partido = case_when(
+      Año == 2018 &
+      Nombre_estado == "Sonora" &
+      ID_distrito_local == 18 &
+      Partido == "C_COMUN_PRI_PVEM_NUAL" ~ "PRI_PVEM_NUAL",
+      TRUE ~ Partido
+    )
+  )  
+```
+
+```{r}
+datos_electorales_2015_2023 <- datos_electorales_2015_2023 %>%
+  mutate(
+    Cabecera_distrital_local = case_when(
+      Año == 2019 &
+      Nombre_estado == "QUINTANA ROO" &
+      ID_distrito_local %in% c(2, 3, 4, 5, 6, 7, 8) &
+      Cabecera_distrital_local == "CANCÚN" ~ "CANCUN",
+      TRUE ~ Cabecera_distrital_local
+    )
+  )
+```
+
+```{r}
+datos_electorales_2015_2023 <- datos_electorales_2015_2023 %>%
+  mutate(
+    Cabecera_distrital_local = case_when(
+      Año == 2019 &
+      Nombre_estado == "QUINTANA ROO" &
+      ID_distrito_local == 12 &
+      Cabecera_distrital_local == "FELIPE C. PUERTO" ~ "FELIPE CARRILLO PUERTO",
+      TRUE ~ Cabecera_distrital_local
+    )
+  )
+```
+
+
+```{r}
+datos_electorales_2015_2023 <- datos_electorales_2015_2023 %>%
+  mutate(
+    Cabecera_distrital_local = case_when(
+      Año == 2019 &
+      Nombre_estado == "TAMAULIPAS" &
+      ID_distrito_local == 16 &
+      Cabecera_distrital_local == "XICOTÉNCATL" ~ "XICOTENCATL",
+      TRUE ~ Cabecera_distrital_local
+    )
+  )
+```
+
+
+```{r}
+datos_electorales_2015_2023 <- datos_electorales_2015_2023 %>%
+  mutate(
+    Cabecera_distrital_local = case_when(
+      Año == 2021 &
+      Nombre_estado == "AGUASCALIENTES" &
+      ID_distrito_local == 2 &
+      Cabecera_distrital_local == "PALO ALTO" ~ "PALO ALTO EL LLANO",
+      TRUE ~ Cabecera_distrital_local
+    )
+  )  
+```
+
+
+```{r}
+datos_electorales_2015_2023 <- datos_electorales_2015_2023 %>%
+  mutate(
+    Cabecera_distrital_local = case_when(
+      Año == 2021 &
+      Nombre_estado == "GUANAJUATO" &
+      ID_distrito_local == 1 &
+      Cabecera_distrital_local == "DOLORES HIDALGO" ~ "DOLORES HIDALGO CIN",
+      TRUE ~ Cabecera_distrital_local
+    )
+  )  
+```
+
+
+```{r}
+datos_electorales_2015_2023 <- datos_electorales_2015_2023 %>%
+  mutate(
+    ID_estado = case_when(
+      Año == 2018 &
+      Nombre_estado == "GUANAJUATO" &
+      ID_distrito_local == 5 &
+      ID_estado == 12 ~ 11,
+      TRUE ~ ID_estado
+    )
+  )
+```
+
+
+```{r}
+datos_electorales_2015_2023 <- datos_electorales_2015_2023 %>%
+  mutate(
+    Cabecera_distrital_local = case_when(
+      Año == 2021 &
+      Nombre_estado == "MEXICO" &
+      ID_distrito_local %in% c(24, 25, 41) &
+      Cabecera_distrital_local == "CD. NEZAHUALCOYOTL" ~ "NEZAHUALCOYOTL",
+      TRUE ~ Cabecera_distrital_local
+    )
+  )
+```
+
+
+```{r}
+datos_electorales_2015_2023 <- datos_electorales_2015_2023 %>%
+  mutate(
+    Cabecera_distrital_local = case_when(
+      Año == 2021 &
+      Nombre_estado == "MEXICO" &
+      ID_distrito_local %in% c(24, 25, 41) &
+      Cabecera_distrital_local == "CD. NEZAHUALCOYOTL" ~ "NEZAHUALCOYOTL",
+      TRUE ~ Cabecera_distrital_local
+    )
+  )
+```
+
+
+```{r}
+# write_csv(datos_electorales_2015_2023, "/home/barea/limpieza/congresos/{{cookiecutter.project_slug}}/data/final/datos_electorales_2015_2023_final.csv")
+```
+
+
+```{r}
+data_cong <- read_csv('~/limpieza/congresos/{{cookiecutter.project_slug}}/data/final/datos_electorales_2015_2023.csv')
+```
+
+```{r}
+data_cong <- read_csv('~/limpieza/congresos/{{cookiecutter.project_slug}}/data/final/datos_electorales_2015_2023_final.csv')
+reactable(data_cong)
 ```
 
 ```{r}
